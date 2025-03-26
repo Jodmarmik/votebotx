@@ -1,23 +1,27 @@
 {
-  "name": "Telegram Vote Bot",
-  "description": "A Telegram bot to handle voting and track left users in channel giveaways.",
-  "repository": "https://github.com/yourusername/vote-bot",
-  "keywords": ["telegram", "bot", "python", "giveaway", "vote"],
+  "name": "Vote Bot with MongoDB",
+  "description": "A Telegram vote bot with channel-only voting, left-user detection, and MongoDB persistence.",
+  "repository": "https://github.com/yourusername/your-vote-bot-repo",
+  "logo": "https://telegram.org/img/t_logo.png",
+  "keywords": ["telegram", "bot", "vote", "pyrogram", "mongodb", "heroku"],
   "env": {
-    "BOT_TOKEN": {
-      "description": "Your bot token from BotFather",
-      "required": true
-    },
     "API_ID": {
-      "description": "Telegram API ID from https://my.telegram.org",
+      "description": "Your Telegram API ID (from https://my.telegram.org)",
       "required": true
     },
     "API_HASH": {
-      "description": "Telegram API HASH from https://my.telegram.org",
+      "description": "Your Telegram API HASH (from https://my.telegram.org)",
+      "required": true
+    },
+    "BOT_TOKEN": {
+      "description": "Your bot token from @BotFather",
+      "required": true
+    },
+    "MONGO_URI": {
+      "description": "Your MongoDB URI from MongoDB Atlas",
       "required": true
     }
   },
-  "addons": [],
   "buildpacks": [
     {
       "url": "heroku/python"
