@@ -1,0 +1,26 @@
+{
+  "name": "Telegram Vote Bot",
+  "description": "A Telegram bot to handle voting and track left users in channel giveaways.",
+  "repository": "https://github.com/yourusername/vote-bot",
+  "keywords": ["telegram", "bot", "python", "giveaway", "vote"],
+  "env": {
+    "BOT_TOKEN": {
+      "description": "Your bot token from BotFather",
+      "required": true
+    },
+    "API_ID": {
+      "description": "Telegram API ID from https://my.telegram.org",
+      "required": true
+    },
+    "API_HASH": {
+      "description": "Telegram API HASH from https://my.telegram.org",
+      "required": true
+    }
+  },
+  "addons": [],
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}
