@@ -1,34 +1,39 @@
-from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
-from pymongo import MongoClient
-from datetime import datetime
 import os
 import uuid
+from datetime import datetime
+from pymongo import MongoClient
+from pyrogram import Client, filters
+from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 
+# Environment Variables
 API_ID = int(os.environ.get("API_ID"))
 API_HASH = os.environ.get("API_HASH")
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
-MONGO_URI = os.environ.get("MONGO_URI")  # add your URI here
+MONGO_URI = os.environ.get("MONGO_URI")
 
+# Initialize bot and database
 client = Client("vote_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 mongo = MongoClient(MONGO_URI)
 db = mongo["vote_bot"]
 votes_collection = db["votes"]
 
+# Start command
 @client.on_message(filters.command("start"))
 async def start(_, message: Message):
     await message.reply_text(
         "**👋 Welcome to the Vote Bot!**\n\n"
-        "Use /vote to create a voting post in your channel.\n"
-        "Only channel subscribers can vote. Leaving the channel after voting will show ❌ Left.\n\n"
+        "Use `/vote` to create a voting post in your channel.\n"
+        "📌 Only channel subscribers can vote.\n"
+        "❌ If a voter leaves the channel, the count updates.\n\n"
         "__Make sure the bot is admin in your channel!__"
     )
 
+# /vote command
 @client.on_message(filters.command("vote"))
 async def vote_command(_, message: Message):
-    await message.reply("Send me your channel username or invite link (without @):")
+    await message.reply("📢 Send me your **channel username** or **invite link** (without @):")
 
-    response = await client.listen(message.chat.id, timeout=60)
+    response = await client.ask(message.chat.id, timeout=60)
     if not response:
         return await message.reply("❌ You didn't respond in time.")
 
@@ -38,7 +43,7 @@ async def vote_command(_, message: Message):
         member = await client.get_chat_member(chat.id, "me")
         if not member.can_post_messages:
             return await message.reply("❌ I must be an admin in that channel with post rights.")
-    except Exception as e:
+    except:
         return await message.reply("❌ Invalid channel or I'm not an admin there.")
 
     vote_id = str(uuid.uuid4())[:8]
@@ -53,7 +58,7 @@ async def vote_command(_, message: Message):
     votes_collection.insert_one(vote_data)
 
     vote_link = f"https://t.me/{client.me.username}?start={vote_id}"
-    await message.reply(f"✅ Vote link created:\n`{vote_link}`")
+    await message.reply(f"✅ **Vote link created:**\n`{vote_link}`")
 
     buttons = [
         [InlineKeyboardButton("👍 Vote", callback_data=f"vote_{vote_id}")],
@@ -61,10 +66,11 @@ async def vote_command(_, message: Message):
     ]
     await client.send_message(
         chat.id,
-        f"🗳️ **New Vote Started!**\n\nUse the link to vote.\nOnly channel subscribers can vote.",
+        f"🗳️ **New Vote Started!**\n\n📌 Click the link to vote.\n📢 Only channel subscribers can vote.",
         reply_markup=InlineKeyboardMarkup(buttons)
     )
 
+# Handling vote link
 @client.on_message(filters.command("start") & filters.private)
 async def handle_vote_link(_, message: Message):
     parts = message.text.strip().split()
@@ -96,14 +102,15 @@ async def handle_vote_link(_, message: Message):
     }
     votes_collection.update_one({"vote_id": vote_id}, {"$set": {"votes": vote["votes"]}})
 
-    await message.reply("🗳️ Thank you for voting!")
+    await message.reply("🗳️ **Thank you for voting!**")
 
+# Handling vote button
 @client.on_callback_query(filters.regex(r"^vote_"))
 async def handle_vote_button(_, query: CallbackQuery):
     vote_id = query.data.split("_")[1]
     vote = votes_collection.find_one({"vote_id": vote_id})
     if not vote:
-        return await query.answer("Invalid vote ID.", show_alert=True)
+        return await query.answer("❌ Invalid or expired vote.", show_alert=True)
 
     user_id = query.from_user.id
     channel_id = vote["channel_id"]
@@ -125,10 +132,14 @@ async def handle_vote_button(_, query: CallbackQuery):
     }
     votes_collection.update_one({"vote_id": vote_id}, {"$set": {"votes": vote["votes"]}})
 
-    await query.answer("✅ Vote counted!")
+    await query.answer("✅ **Vote counted!**")
 
+# Detect Leavers
 @client.on_chat_member_updated()
 async def detect_leavers(_, member_update):
+    if not member_update.old_chat_member or not member_update.new_chat_member:
+        return
+
     if member_update.old_chat_member.status != "member":
         return
 
@@ -144,7 +155,5 @@ async def detect_leavers(_, member_update):
         if vote and str(user_id) not in vote.get("left_users", []):
             vote["left_users"].append(str(user_id))
             votes_collection.update_one({"vote_id": vote["vote_id"]}, {"$set": {"left_users": vote["left_users"]}})
-
-            # Here you can also edit the channel message if you store message_id
 
 client.run()
