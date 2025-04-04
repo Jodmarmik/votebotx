@@ -28,10 +28,12 @@ async def start(_, message: Message):
     )
 
 @client.on_message(filters.command("vote"))
-async def vote_command(_, message: Message):
+async def vote_command(client, message: Message):
     await message.reply("📢 Send me your **channel username** or **invite link** (without @):")
 
-    response = await client.ask(message.chat.id, timeout=60)  # ✅ FIXED (listen -> ask)
+    # ✅ FIX: Create a new client instance for ask()
+    response = await message.chat.ask("Waiting for response...", timeout=60)  
+
     if not response:
         return await message.reply("❌ You didn't respond in time.")
 
@@ -67,7 +69,6 @@ async def vote_command(_, message: Message):
         f"🗳️ **New Vote Started!**\n\nUse the link to vote.\nOnly channel subscribers can vote.",
         reply_markup=InlineKeyboardMarkup(buttons)
     )
-
 
 # 🎫 Handling Start with Vote Link
 @client.on_message(filters.command("start") & filters.private)
