@@ -27,7 +27,6 @@ async def start(_, message: Message):
         "__Make sure the bot is admin in your channel!__"
     )
 
-# 🗳 VOTE Command
 @client.on_message(filters.command("vote"))
 async def vote_command(_, message: Message):
     await message.reply("📢 Send me your **channel username** or **invite link** (without @):")
@@ -68,6 +67,7 @@ async def vote_command(_, message: Message):
         f"🗳️ **New Vote Started!**\n\nUse the link to vote.\nOnly channel subscribers can vote.",
         reply_markup=InlineKeyboardMarkup(buttons)
     )
+
 
 # 🎫 Handling Start with Vote Link
 @client.on_message(filters.command("start") & filters.private)
