@@ -31,8 +31,8 @@ async def start(_, message: Message):
 async def vote_command(client, message: Message):
     await message.reply("📢 Send me your **channel username** or **invite link** (without @):")
 
-    # ✅ FIX: Create a new client instance for ask()
-    response = await message.chat.ask("Waiting for response...", timeout=60)  
+    # ✅ Correct way to use ask()
+    response = await message.ask("Waiting for response...", timeout=60)  
 
     if not response:
         return await message.reply("❌ You didn't respond in time.")
