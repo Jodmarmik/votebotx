@@ -1,30 +1,48 @@
 {
-  "name": "Vote Bot with MongoDB",
-  "description": "A Telegram vote bot with channel-only voting, left-user detection, and MongoDB persistence.",
-  "repository": "https://github.com/yourusername/your-vote-bot-repo",
-  "logo": "https://telegram.org/img/t_logo.png",
-  "keywords": ["telegram", "bot", "vote", "pyrogram", "mongodb", "heroku"],
+  "name": "telegram-media-deleter-bot",
+  "description": "A Telegram bot that deletes media in groups after a delay.",
+  "repository": "https://github.com/yourusername/telegram-media-deleter-bot",
+  "keywords": ["telegram","bot","media","moderation"],
   "env": {
-    "API_ID": {
-      "description": "Your Telegram API ID (from https://my.telegram.org)",
+    "BOT_TOKEN": {
+      "description": "Bot token from @BotFather",
       "required": true
+    },
+    "API_ID": {
+      "description": "Optional Telegram API ID (if you want it saved)",
+      "required": false
     },
     "API_HASH": {
-      "description": "Your Telegram API HASH (from https://my.telegram.org)",
-      "required": true
+      "description": "Optional Telegram API HASH (if you want it saved)",
+      "required": false
     },
-    "BOT_TOKEN": {
-      "description": "Your bot token from @BotFather",
+    "OWNER_ID": {
+      "description": "Your Telegram user id (owner). Used for /broadcast (integer).",
       "required": true
     },
     "MONGO_URI": {
-      "description": "Your MongoDB URI from MongoDB Atlas",
+      "description": "MongoDB connection string (e.g. from MongoDB Atlas)",
       "required": true
+    },
+    "SUPPORT_GROUP_URL": {
+      "description": "URL to your Support Group (like https://t.me/yourgroup)",
+      "required": false,
+      "value": "https://t.me/your_support_group"
+    },
+    "SUPPORT_CHAT_URL": {
+      "description": "URL to your Support Chat",
+      "required": false,
+      "value": "https://t.me/your_support_chat"
+    },
+    "DEFAULT_DELAY": {
+      "description": "Default deletion delay in seconds (300 = 5 minutes).",
+      "required": false,
+      "value": "300"
     }
   },
-  "buildpacks": [
-    {
-      "url": "heroku/python"
+  "formation": {
+    "web": {
+      "quantity": 1
     }
-  ]
+  }
 }
